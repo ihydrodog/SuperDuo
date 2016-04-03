@@ -1,8 +1,12 @@
 package it.jaschke.alexandria;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -29,6 +33,25 @@ public class ListOfBooks extends Fragment implements LoaderManager.LoaderCallbac
 
     private final int LOADER_ID = 10;
 
+
+    class BookListObserver extends ContentObserver {
+        /**
+         * Creates a content observer.
+         *
+         * @param handler The handler to run {@link #onChange} on, or null if none.
+         */
+        public BookListObserver(Handler handler) {
+            super(handler);
+        }
+        @Override
+        public void onChange(boolean selfChange)
+        {
+            ListOfBooks.this.restartLoader();
+        }
+    };
+
+    BookListObserver m_observer;
+
     public ListOfBooks() {
     }
 
@@ -40,7 +63,8 @@ public class ListOfBooks extends Fragment implements LoaderManager.LoaderCallbac
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        Cursor cursor = getActivity().getContentResolver().query(
+        ContentResolver contentResolver = getActivity().getContentResolver();
+        Cursor cursor = contentResolver.query(
                 AlexandriaContract.BookEntry.CONTENT_URI,
                 null, // leaving "columns" null just returns all the columns.
                 null, // cols for "where" clause
@@ -75,6 +99,11 @@ public class ListOfBooks extends Fragment implements LoaderManager.LoaderCallbac
                 }
             }
         });
+
+
+        // register observer to update list
+        m_observer = new BookListObserver( new Handler());
+        contentResolver.registerContentObserver( AlexandriaContract.BookEntry.CONTENT_URI, true, m_observer );
 
         return rootView;
     }
@@ -129,5 +158,12 @@ public class ListOfBooks extends Fragment implements LoaderManager.LoaderCallbac
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         activity.setTitle(R.string.books);
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        ContentResolver contentResolver = getActivity().getContentResolver();
+        contentResolver.unregisterContentObserver( m_observer);
     }
 }

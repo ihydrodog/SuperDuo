@@ -108,8 +108,8 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
     @Override
     public void onRestoreInstanceState(Bundle savedInstanceState) {
         selectedEAN = savedInstanceState.getString(STATE_EAN);
-        if( selectedEAN != null && selectedEAN.isEmpty() == false)
-            onItemSelected( selectedEAN);
+//        if( selectedEAN != null && selectedEAN.isEmpty() == false)
+//            onItemSelected( selectedEAN);
     }
 
     @Override
@@ -177,9 +177,6 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
         }
     }
 
-    public void goBack(View view){
-        getSupportFragmentManager().popBackStack();
-    }
 
     private boolean isTablet() {
         return (getApplicationContext().getResources().getConfiguration().screenLayout
@@ -187,13 +184,13 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerF
                 >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 
-    @Override
-    public void onBackPressed() {
-        if(getSupportFragmentManager().getBackStackEntryCount()<2){
-            finish();
-        }
-        super.onBackPressed();
-    }
+//    @Override
+//    public void onBackPressed() {
+//        if(getSupportFragmentManager().getBackStackEntryCount()<2){
+//            finish();
+//        }
+//        super.onBackPressed();
+//    }
 
 
 }

@@ -57,6 +57,11 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
             }
         });
 
+        Bundle arguments = getArguments();
+        if (arguments != null) {
+            ean = arguments.getString(BookDetail.EAN_KEY);
+            getLoaderManager().restartLoader(LOADER_ID, null, this);
+        }
 
         return rootView;
     }
@@ -69,11 +74,7 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
         shareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
 
 
-        Bundle arguments = getArguments();
-        if (arguments != null) {
-            ean = arguments.getString(BookDetail.EAN_KEY);
-            getLoaderManager().restartLoader(LOADER_ID, null, this);
-        }
+
     }
 
     @Override
@@ -100,7 +101,7 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
         shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text)+bookTitle);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, getString(R.string.share_text) + bookTitle);
         shareActionProvider.setShareIntent(shareIntent);
 
         String bookSubTitle = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.SUBTITLE));
@@ -110,9 +111,13 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
         ((TextView) rootView.findViewById(R.id.fullBookDesc)).setText(desc);
 
         String authors = data.getString(data.getColumnIndex(AlexandriaContract.AuthorEntry.AUTHOR));
-        String[] authorsArr = authors.split(",");
-        ((TextView) rootView.findViewById(R.id.authors)).setLines(authorsArr.length);
-        ((TextView) rootView.findViewById(R.id.authors)).setText(authors.replace(",","\n"));
+
+        if( authors != null) {
+            String[] authorsArr = authors.split(",");
+            ((TextView) rootView.findViewById(R.id.authors)).setLines(authorsArr.length);
+            ((TextView) rootView.findViewById(R.id.authors)).setText(authors.replace(",", "\n"));
+        }
+
         String imgUrl = data.getString(data.getColumnIndex(AlexandriaContract.BookEntry.IMAGE_URL));
         if(Patterns.WEB_URL.matcher(imgUrl).matches()){
             new DownloadImage((ImageView) rootView.findViewById(R.id.fullBookCover)).execute(imgUrl);
@@ -121,10 +126,6 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
 
         String categories = data.getString(data.getColumnIndex(AlexandriaContract.CategoryEntry.CATEGORY));
         ((TextView) rootView.findViewById(R.id.categories)).setText(categories);
-
-        if(rootView.findViewById(R.id.right_container)!=null){
-            rootView.findViewById(R.id.backButton).setVisibility(View.INVISIBLE);
-        }
 
     }
 
@@ -137,7 +138,7 @@ public class BookDetail extends Fragment implements LoaderManager.LoaderCallback
     public void onPause() {
         super.onDestroyView();
         if(MainActivity.IS_TABLET && rootView.findViewById(R.id.right_container)==null){
-            getActivity().getSupportFragmentManager().popBackStack();
+            getActivity().getSupportFragmentManager().popBackStack( "Book Detail", 0);
         }
     }
 }
